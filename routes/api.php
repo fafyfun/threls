@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\OrderController as OrderControllerAlias;
 use App\Http\Controllers\Api\ProductController as ProductControllerAlias;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -25,14 +26,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/auth/register', [AuthController::class, 'newUser']);
 Route::post('/auth/login', [AuthController::class, 'loginUser']);
-Route::post('/auth/logout', [AuthController::class, 'logOut']);
-
 
 
 Route::group(['middleware' => 'auth:sanctum'], function() {
     Route::get('/auth/logout', [AuthController::class, 'logOut']);
     Route::post('/cart/addToCart', [CartController::class, 'addToCart']);
     Route::post('/cart/delete', [CartController::class, 'removeCart']);
+    Route::post('/order/checkOut', [OrderControllerAlias::class, 'createOrder']);
+
+
 });
 
 

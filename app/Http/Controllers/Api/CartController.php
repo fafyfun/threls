@@ -21,41 +21,47 @@ class CartController extends Controller
     public function addToCart(Request $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
-            'product_id' => 'required|exists:products,id',
-            'product_price' => 'required',
-            'qty' => 'required',
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'product_id' => 'required|exists:products,id',
+                'product_price' => 'required',
+                'qty' => 'required',
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => "Validation Error",
+                    'error' => $validator->errors()
 
-        if ($validator->fails()) {
+                ], 401
+
+                );
+            }
+            $cart = Cart::updateOrCreate([
+                'user_id' => auth()->user()->id,
+                'product_id' => $request->product_id,
+
+
+            ],
+                ['qty' => $request->qty, 'product_price' => $request->product_price]
+            );
+            return response()->json([
+                'status' => true,
+                'cart' => $this->getCartList(auth()->user()->id),
+
+            ], 200
+
+            );
+        } catch (\Exception $e) {
+
             return response()->json([
                 'status' => false,
-                'message' => "Validation Error",
-                'error' => $validator->errors()
+                'message' => $e->getMessage()
 
-            ], 401
+            ], 500
 
             );
         }
-
-        $cart = Cart::updateOrCreate([
-            'user_id' => $request->user_id,
-            'product_id' => $request->product_id,
-
-
-        ],
-            ['qty' =>  $request->qty,'product_price' => $request->product_price]
-        );
-
-
-        return response()->json([
-            'status' => true,
-            'cart' => $this->getCartList($request->user_id),
-
-        ], 200
-
-        );
 
 
     }
@@ -70,34 +76,40 @@ class CartController extends Controller
 
     public function removeCart(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
-            'product_id' => 'required|exists:products,id',
-        ]);
 
-        if ($validator->fails()) {
+
+        try {
+            $validator = Validator::make($request->all(), [
+                'product_id' => 'required|exists:products,id',
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => "Validation Error",
+                    'error' => $validator->errors()
+
+                ], 401
+
+                );
+            }
+            $delete = Cart::where(['user_id' => auth()->user()->id, 'product_id' => $request->product_id])->delete();
+            return response()->json([
+                'status' => true,
+                'cart' => $this->getCartList(auth()->user()->id),
+
+            ], 200
+
+            );
+        } catch (\Exception $e) {
+
             return response()->json([
                 'status' => false,
-                'message' => "Validation Error",
-                'error' => $validator->errors()
+                'message' => $e->getMessage()
 
-            ], 401
+            ], 500
 
             );
         }
-
-        $delete = Cart::where(['user_id'=>$request->user_id,'product_id'=>$request->product_id])->delete();
-
-
-        return response()->json([
-            'status' => true,
-            'cart' => $this->getCartList($request->user_id),
-
-        ], 200
-
-        );
-
-
 
 
     }
@@ -123,7 +135,6 @@ class CartController extends Controller
         }
 
         return $cartList;
-
 
     }
 
