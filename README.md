@@ -50,7 +50,6 @@ Add To Cart
 
 Request Body : {
     
-"user_id:: "User ID",
 "product_id" : "Product ID"
 "product_price" : "Product Price"
 "qty" : "Quantity"
@@ -63,8 +62,19 @@ Remove From Cart
 
 Request Body : {
     
-"user_id:: "User ID",
 "product_id" : "Product ID"
+
+
+}
+
+Remove From Checkout
+
+{{url}}/cart/delete
+
+Request Body : {
+    
+"address" : "Address"
+"contactNo" : "Contact Number"
 
 
 }
